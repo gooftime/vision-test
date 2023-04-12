@@ -5,10 +5,17 @@ import MotionPathPlugin from "gsap/MotionPathPlugin";
 import CSSPlugin from "gsap/CSSPlugin";
 import Landolt from "./landolt.svg";
 import lottie from "lottie-web";
-import { onMount, createSignal } from "solid-js";
+import { onMount, createSignal, createEffect } from "solid-js";
+import { createStore } from "solid-js/store";
 // import LottieCat from './lottie/cat'
 // import LottieDog from "./lottie/dog.json";
 // import LottieFish from "./lottie/fish.json";
+import mp3success from "../public/mp3/correct.mp3";
+import mp3fail from "../public/mp3/wrong.mp3";
+import mp3cat from "../public/mp3/cat.mp3";
+import mp3dog from "../public/mp3/dog.mp3";
+import mp3bird from "../public/mp3/bird.mp3";
+import mp3fish from "../public/mp3/fish.mp3";
 
 gsap.registerPlugin(CustomEase);
 gsap.registerPlugin(MotionPathPlugin);
@@ -26,37 +33,88 @@ tiger - https://assets4.lottiefiles.com/packages/lf20_lc46h4dr.json
 */
 
 export default function App() {
-  let anim1Container,
-    anim2Container,
-    anim3Container,
-    anim4Container,
-    landolt,
-    pathRef,
-    spinAnim,
-    throwAnim,
-    cake;
-  let anim1, anim2, anim3, anim4;
-  // let [sizes, setSized] = createSignal([0.732, 0.582, 0.462, 0.361, 0.287]); // 40sm
-  let [sizes] = createSignal([
-    { vision: 0.1, size: 50.24 },
-    { vision: 0.4, size: 12.56 },
-    { vision: 0.8, size: 6.28 },
-    { vision: 1.0, size: 5.024 },
+  let entities = {
+    top: { container: undefined, audio: new Audio(mp3dog), anim: undefined },
+    right: { container: undefined, audio: new Audio(mp3fish), anim: undefined },
+    bottom: {
+      container: undefined,
+      audio: new Audio(mp3bird),
+      anim: undefined,
+    },
+    left: { container: undefined, audio: new Audio(mp3cat), anim: undefined },
+  };
+
+  let landolt, pathRef, spinAnim, throwAnim, cake;
+  let audioSuccess = new Audio(mp3success),
+    audioFail = new Audio(mp3fail);
+
+  const [size, setSize] = createSignal(0);
+  const [direction, setDirection] = createSignal("right");
+  const [dpi, setDpi] = createSignal(96);
+  const [isWindowSmall, setWindowSmall] = createSignal(false);
+  let [sizes, setSizes] = createStore([
+    // { vision: 0.1, size: 50.24 },
+    // { vision: 0.4, size: 12.56 },
+    // { vision: 0.8, size: 6.28 },
+    // { vision: 1.0, size: 5.024 },
+    // { vision: "5m 1.0", size: 7.2722222 },
+    // { vision: "5m 0.1", size: 72.7222222 },
+    // { vision: "2m 0.8", size: 1.4544444 },
+    // { vision: "2m 0.4", size: 2.9088888 },
+    // { vision: "2m 0.1", size: 11.6355552 },
+    // { vision: "1m 0.8", size: 1.818 },
+    // { vision: "1m 0.4", size: 3.636 },
+    {
+      vision: "1m 0.1",
+      mm: 25.544,
+      get px() {
+        return (dpi() * this.mm) / 25.4;
+      },
+    },
+    {
+      vision: "1m 0.4",
+      mm: 7.636,
+      get px() {
+        return (dpi() * this.mm) / 25.4;
+      },
+    },
+    {
+      vision: "1m 0.8",
+      mm: 3.118,
+      get px() {
+        return (dpi() * this.mm) / 25.4;
+      },
+    },
+    //{ vision: "0.5m 0.4", size: 3.1181 },
+    // { vision: "0.5m 0.3", size: 2.424074 },
+    // { vision: "0.5m 0.1", size: 7.272223 },
   ]); // 3m
 
-  const [size, setSize] = createSignal(sizes()[0].size);
-  const [direction, setDirection] = createSignal("right");
-  const [isWindowSmall, setWindowSmall] = createSignal(false);
+  // createEffect(() => {
+  //   // setSize(sizes()[0].pixels);
+  //   console.log("effect: ");
+  //   console.log(sizes);
+  // });
 
+  const _setLocalDpi = (v) => {
+    window.localStorage.setItem("dpi", v);
+    setDpi(v);
+  };
+
+  const _getDirectionByDegree = (degree) => {
+    if (degree === 90) return "bottom";
+    if (degree === 180) return "left";
+    if (degree === 270) return "top";
+    if (degree === 360 || degree === 0) return "right";
+  };
   const _spin = () => {
     if (spinAnim?.isActive()) return;
 
-    const r = Math.floor(Math.random() * 4) * 90;
-    let d;
-    if (r === 90) d = "bottom";
-    if (r === 180) d = "left";
-    if (r === 270) d = "top";
-    if (r === 360 || r === 0) d = "right";
+    let r, d;
+    do {
+      r = Math.floor(Math.random() * 4) * 90;
+      d = _getDirectionByDegree(r);
+    } while (direction() === d);
     setDirection(d);
 
     spinAnim = gsap
@@ -67,7 +125,7 @@ export default function App() {
         // ease: "power3.inOut",
         ease: "expo.in",
         // ease: "back.in(1.1)",
-        duration: 2,
+        duration: 1.3,
       })
       .to(
         pathRef,
@@ -75,23 +133,25 @@ export default function App() {
           attr: {
             d: "M 99.4 73.5 H 126 c -4.9 30.2 -31 53.2 -62.6 53.2 C 28.4 126.8 0 98.4 0 63.4 S 28.4 0 63.4 0 C 95 0 121.1 23.1 126.8 53.3 H 126.8 v 20.2 z",
           },
-          duration: 0.6,
+          duration: 0.3,
         },
         "<"
       )
-      .set(landolt, { rotation: r }, 2)
+      .set(landolt, { rotation: r }, 1.3)
       .set(pathRef, {
         attr: {
           d: "M 99.4 73.5 H 126 c -4.9 30.2 -31 53.2 -62.6 53.2 C 28.4 126.8 0 98.4 0 63.4 S 28.4 0 63.4 0 C 95 0 121.1 23.1 126 53.3 H 99 v 20.2 z",
         },
       });
   };
-
-  const _throwCake = (anim) => {
+  const _throwCake = async (_direction) => {
     if (throwAnim?.isActive()) return;
+    if (_direction === direction()) _playSuccess(entities[_direction].audio);
+    else _playFail(entities[_direction].audio);
+    // _playAudio(audio)
     throwAnim = gsap
       .timeline()
-      .call(() => anim.play())
+      .call(() => entities[_direction].anim.play())
       .set(cake, {
         width: 10,
         height: 10,
@@ -103,11 +163,11 @@ export default function App() {
         width: 150,
         height: 150,
         ease: "power1.out",
-        duration: 1.25,
+        duration: 1,
       })
-      .to(cake, { width: 0, height: 0, ease: "power1.in", duration: 1.25 })
-      .to(cake, { rotation: `+=${360 * 2}`, ease: "expo.in", duration: 2.5 }, 0)
-      .call(() => anim.pause(), [], 3.5);
+      .to(cake, { width: 0, height: 0, ease: "power1.in", duration: 1 })
+      .to(cake, { rotation: `+=${360 * 2}`, ease: "expo.in", duration: 2 }, 0)
+      .call(() => entities[_direction].anim.pause(), [], 3);
 
     if (direction() === "right")
       throwAnim.to(cake, { translateX: "11cm", duration: 2.25 }, 0);
@@ -118,7 +178,6 @@ export default function App() {
     else if (direction() === "bottom")
       throwAnim.to(cake, { translateY: "8cm", duration: 2.25 }, 0);
   };
-
   const _checkWindowSize = () => {
     if (document.body.scrollHeight > document.body.clientHeight)
       setWindowSmall(true);
@@ -126,29 +185,52 @@ export default function App() {
       setWindowSmall(true);
     else setWindowSmall(false);
   };
+  const _playAudio = (audio) => {
+    return new Promise((res) => {
+      audio.play();
+      audio.onended = res;
+    });
+  };
+  const _playFail = async (audio) => {
+    await _playAudio(audioFail);
+    _playAudio(audio);
+  };
+  const _playSuccess = async (audio) => {
+    await _playAudio(audioSuccess);
+    _playAudio(audio);
+  };
 
   onMount(() => {
     //_checkWindowSize();
     window.addEventListener("resize", _checkWindowSize);
 
-    anim1 = lottie.loadAnimation({
-      container: anim1Container,
+    setDpi(window.localStorage.getItem("dpi") || 96);
+
+    // console.log(
+    //   "Your screen resolution is: " +
+    //     window.screen.width * window.devicePixelRatio +
+    //     "x" +
+    //     window.screen.height * window.devicePixelRatio
+    // );
+
+    entities.top.anim = lottie.loadAnimation({
+      container: entities.top.container,
       renderer: "svg",
       loop: true,
       autoplay: false,
       // path: "https://assets4.lottiefiles.com/packages/lf20_F2Mv1p.json",
       path: "./lottie/dog.json",
     });
-    anim2 = lottie.loadAnimation({
-      container: anim2Container,
+    entities.right.anim = lottie.loadAnimation({
+      container: entities.right.container,
       renderer: "svg",
       loop: true,
       autoplay: false,
       // path: "https://assets3.lottiefiles.com/packages/lf20_zxfaytb8.json",
       path: "./lottie/fish.json",
     });
-    anim3 = lottie.loadAnimation({
-      container: anim3Container,
+    entities.bottom.anim = lottie.loadAnimation({
+      container: entities.bottom.container,
       renderer: "svg",
       loop: true,
       autoplay: false,
@@ -157,8 +239,8 @@ export default function App() {
       path: "./lottie/bird.json",
       // path: "https://assets4.lottiefiles.com/packages/lf20_lc46h4dr.json",
     });
-    anim4 = lottie.loadAnimation({
-      container: anim4Container,
+    entities.left.anim = lottie.loadAnimation({
+      container: entities.left.container,
       renderer: "svg",
       loop: true,
       autoplay: false,
@@ -178,18 +260,26 @@ export default function App() {
 
         <div class="absolute top-20px right-20px">
           <div class="flex flex-col">
-            <For each={sizes()}>
+            <For each={sizes}>
               {(_size, i) => (
                 <div
-                  onClick={() => setSize(_size["size"])}
+                  onClick={() => setSize(i())}
                   class={`cursor-pointer border py-1 px-2 select-none outline-none flex justify-center ${
-                    size() === _size["size"] ? "bg-gray-200" : ""
+                    size() === i() ? "bg-gray-200" : ""
                   }`}
                 >
                   {_size["vision"]}
                 </div>
               )}
             </For>
+            <div class="mt-4">
+              <input
+                class="border py-1 px-2 flex justify-center outline-none w-16 text-gray-500 focus:text-black"
+                type="text"
+                value={dpi()}
+                onInput={(e) => _setLocalDpi(e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
@@ -197,14 +287,18 @@ export default function App() {
           {/* Landolt */}
           <div
             class="flex justify-center items-center cursor-pointer"
-            style="height: 5cm; width: 5cm;"
+            // style="height: 5cm; width: 5cm;"
+            style={{
+              width: "117mm",
+              height: "117mm",
+            }}
             onClick={_spin}
           >
             <svg
               //class="h-full w-full"
               style={{
-                width: size() + "mm",
-                height: size() + "mm",
+                width: sizes[size()].px + "px",
+                height: sizes[size()].px + "px",
               }}
               ref={landolt}
               xmlns="http://www.w3.org/2000/svg"
@@ -230,7 +324,7 @@ export default function App() {
           {/* <Cake> */}
           <div
             class="h-auto z-2 absolute left-1/2 bottom-1/2 transform -translate-x-1/2 translate-y-1/2 pointer-events-none select-none"
-            style={{ width: size() / 2.3 + "mm" }}
+            style={{ width: sizes[size()].px / 2.3 + "px" }}
             ref={cake}
           >
             {/* <img class="w-full h-full object-contain" src="/img/cake.png" /> */}
@@ -243,35 +337,34 @@ export default function App() {
 
           {/* Animal top */}
           <div
-            class="absolute left-1/2 transform -translate-x-1/2"
-            style="height: 8cm; width: 8cm; top: -9.5cm;"
-            ref={anim1Container}
-            onClick={() => _throwCake(anim1, "top")}
+            class="absolute left-1/2 transform -translate-x-1/2 cursor-pointer"
+            style="height: 8cm; width: 8cm; top: -6cm;"
+            ref={entities.top.container}
+            onClick={() => _throwCake("top")}
           />
 
           {/* Animal right */}
           <div
-            class="absolute top-1/2 transform -translate-y-1/2"
-            style="height: 8cm; width: 8cm; left: calc(100% + 1.5cm);"
-            ref={anim2Container}
-            onClick={() => _throwCake(anim2, "right")}
+            class="absolute top-1/2 transform -translate-y-1/2 cursor-pointer"
+            style="height: 8cm; width: 8cm; left: 10.5cm;"
+            ref={entities.right.container}
+            onClick={() => _throwCake("right")}
           />
 
           {/* Animal bottom */}
           <div
-            class="absolute top-full left-1/2 transform -translate-x-1/2"
-            // style="height: 12cm; width: 12cm; top: calc(100% + 1.5cm);"
-            style="height: 12cm; width: 12cm; top: 4cm;"
-            ref={anim3Container}
-            onClick={() => _throwCake(anim3, "bottom")}
+            class="absolute top-full left-1/2 transform -translate-x-1/2 cursor-pointer"
+            style="height: 12cm; width: 12cm; top: 8cm;"
+            ref={entities.bottom.container}
+            onClick={() => _throwCake("bottom")}
           />
 
           {/* Animal left */}
           <div
-            class="absolute top-1/2 transform -translate-y-1/2"
-            style="height: 8cm; width: 8cm; left: -9.5cm;"
-            ref={anim4Container}
-            onClick={() => _throwCake(anim4, "left")}
+            class="absolute top-1/2 transform -translate-y-1/2 cursor-pointer"
+            style="height: 8cm; width: 8cm; left: -6.5cm;"
+            ref={entities.left.container}
+            onClick={() => _throwCake("left")}
           />
         </div>
       </div>
