@@ -53,17 +53,6 @@ export default function App() {
   const [dpi, setDpi] = createSignal(96);
   const [isWindowSmall, setWindowSmall] = createSignal(false);
   let [sizes, setSizes] = createStore([
-    // { vision: 0.1, size: 50.24 },
-    // { vision: 0.4, size: 12.56 },
-    // { vision: 0.8, size: 6.28 },
-    // { vision: 1.0, size: 5.024 },
-    // { vision: "5m 1.0", size: 7.2722222 },
-    // { vision: "5m 0.1", size: 72.7222222 },
-    // { vision: "2m 0.8", size: 1.4544444 },
-    // { vision: "2m 0.4", size: 2.9088888 },
-    // { vision: "2m 0.1", size: 11.6355552 },
-    // { vision: "1m 0.8", size: 1.818 },
-    // { vision: "1m 0.4", size: 3.636 },
     {
       vision: "1m 0.1",
       mm: 14.544,
@@ -95,9 +84,6 @@ export default function App() {
         return dpi() * this.inches;
       },
     },
-    //{ vision: "0.5m 0.4", size: 3.1181 },
-    // { vision: "0.5m 0.3", size: 2.424074 },
-    // { vision: "0.5m 0.1", size: 7.272223 },
   ]); // 3m
 
   // createEffect(() => {
@@ -162,20 +148,9 @@ export default function App() {
     throwAnim = gsap
       .timeline()
       .call(() => entities[_direction].anim.play())
-      .set(cake, {
-        width: 10,
-        height: 10,
-        translateX: 1 / 2,
-        translateY: -1 / 2,
-      })
-      .to(cake, {
-        scale: 1,
-        width: 150,
-        height: 150,
-        ease: "power1.out",
-        duration: 1,
-      })
-      .to(cake, { width: 0, height: 0, ease: "power1.in", duration: 1 })
+      .set(cake, { width: 10 })
+      .to(cake, { width: 150, ease: "power1.out", duration: 1 })
+      .to(cake, { width: 0, ease: "power1.in", duration: 1 })
       .to(cake, { rotation: `+=${360 * 2}`, ease: "expo.in", duration: 2 }, 0)
       .call(() => entities[_direction].anim.pause(), [], 3);
 
@@ -187,7 +162,30 @@ export default function App() {
       throwAnim.to(cake, { translateY: "-8cm", duration: 2.25 }, 0);
     else if (direction() === "bottom")
       throwAnim.to(cake, { translateY: "8cm", duration: 2.25 }, 0);
+
+    throwAnim
+      .set(
+        cake,
+        {
+          rotate: 0,
+          // translateX: 1 / 2,
+          // translateY: 1 / 2,
+          translateX: 0,
+          translateY: 0,
+          // translateY: 1 / 2,
+          xPercent: -50,
+          yPercent: 50,
+          // transform: "none",
+        },
+        ">.3"
+      )
+      .to(cake, {
+        width: sizes[size()].px / 2.3 + "px",
+        ease: "back.out(2.7)",
+        duration: 0.7,
+      });
   };
+
   const _checkWindowSize = () => {
     if (document.body.scrollHeight > document.body.clientHeight)
       setWindowSmall(true);
@@ -195,12 +193,14 @@ export default function App() {
       setWindowSmall(true);
     else setWindowSmall(false);
   };
+
   const _playAudio = (audio) => {
     return new Promise((res) => {
       audio.play();
       audio.onended = res;
     });
   };
+
   const _playFail = async (audio) => {
     await _playAudio(audioFail);
     _playAudio(audio);
@@ -308,7 +308,7 @@ export default function App() {
               //class="h-full w-full"
               style={{
                 width: sizes[size()].px + "px",
-                // height: sizes[size()].px + "px",
+                height: sizes[size()].px + "px",
               }}
               ref={landolt}
               xmlns="http://www.w3.org/2000/svg"
