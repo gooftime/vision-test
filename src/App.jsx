@@ -10,12 +10,12 @@ import { createStore } from "solid-js/store";
 // import LottieCat from './lottie/cat'
 // import LottieDog from "./lottie/dog.json";
 // import LottieFish from "./lottie/fish.json";
-import mp3success from "../public/mp3/correct.mp3";
-import mp3fail from "../public/mp3/wrong.mp3";
-import mp3cat from "../public/mp3/cat.mp3";
-import mp3dog from "../public/mp3/dog.mp3";
-import mp3bird from "../public/mp3/bird.mp3";
-import mp3fish from "../public/mp3/fish.mp3";
+import mp3success from "/mp3/correct.mp3";
+import mp3fail from "/mp3/wrong.mp3";
+import mp3cat from "/mp3/cat.mp3";
+import mp3dog from "/mp3/dog.mp3";
+import mp3bird from "/mp3/bird.mp3";
+import mp3fish from "/mp3/fish.mp3";
 
 gsap.registerPlugin(CustomEase);
 gsap.registerPlugin(MotionPathPlugin);
@@ -163,27 +163,29 @@ export default function App() {
     else if (direction() === "bottom")
       throwAnim.to(cake, { translateY: "8cm", duration: 2.25 }, 0);
 
-    throwAnim
-      .set(
-        cake,
-        {
-          rotate: 0,
-          // translateX: 1 / 2,
-          // translateY: 1 / 2,
-          translateX: 0,
-          translateY: 0,
-          // translateY: 1 / 2,
-          xPercent: -50,
-          yPercent: 50,
-          // transform: "none",
-        },
-        ">.3"
-      )
-      .to(cake, {
+    throwAnim.set(
+      cake,
+      {
+        rotate: 0,
+        // translateX: 1 / 2,
+        // translateY: 1 / 2,
+        translateX: 0,
+        translateY: 0,
+        // translateY: 1 / 2,
+        xPercent: -50,
+        yPercent: 50,
+        // transform: "none",
+      },
+      ">.3"
+    );
+    console.log(size());
+    if (size() === 0) {
+      throwAnim.to(cake, {
         width: sizes[size()].px / 2.3 + "px",
         ease: "back.out(2.7)",
         duration: 0.7,
       });
+    }
   };
 
   const _checkWindowSize = () => {
@@ -273,7 +275,24 @@ export default function App() {
             <For each={sizes}>
               {(_size, i) => (
                 <div
-                  onClick={() => setSize(i())}
+                  onClick={() => {
+                    setSize(i());
+
+                    // remove banana if not the. bigest size
+                    if (i() !== 0) {
+                      gsap.to(cake, {
+                        width: 0,
+                        duration: 0.6,
+                        ease: "power2.inOut",
+                      });
+                    } else {
+                      gsap.from(cake, {
+                        width: 0,
+                        duration: 0.6,
+                        ease: "power2.inOut",
+                      });
+                    }
+                  }}
                   class={`cursor-pointer border py-1 px-2 select-none outline-none flex justify-center ${
                     size() === i() ? "bg-gray-200" : ""
                   }`}
