@@ -117,10 +117,7 @@ export default function App() {
       .timeline()
       .to(landolt, {
         rotation: `+=${360 * 7 + r}`,
-        // ease: "spin",
-        // ease: "power3.inOut",
         ease: "expo.in",
-        // ease: "back.in(1.1)",
         duration: 1.3,
       })
       .to(
@@ -163,24 +160,29 @@ export default function App() {
     else if (direction() === "bottom")
       throwAnim.to(cake, { translateY: "8cm", duration: 2.25 }, 0);
 
-    throwAnim.set(
-      cake,
-      {
-        rotate: 0,
-        // translateX: 1 / 2,
-        // translateY: 1 / 2,
-        translateX: 0,
-        translateY: 0,
-        // translateY: 1 / 2,
-        xPercent: -50,
-        yPercent: 50,
-        // transform: "none",
-      },
-      ">.3"
-    );
-    console.log(size());
+    // return banana to the center
+    throwAnim
+      .set(
+        cake,
+        {
+          rotate: 0,
+          // translateX: 1 / 2,
+          // translateY: 1 / 2,
+          translateX: 0,
+          translateY: 0,
+          // translateY: 1 / 2,
+          xPercent: -50,
+          yPercent: 50,
+          // transform: "none",
+        },
+        ">.3"
+      )
+      .then(_bananaAppear);
+  };
+
+  const _bananaAppear = () => {
     if (size() === 0) {
-      throwAnim.to(cake, {
+      gsap.to(cake, {
         width: sizes[size()].px / 2.3 + "px",
         ease: "back.out(2.7)",
         duration: 0.7,
