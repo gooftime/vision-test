@@ -120,22 +120,22 @@ export default function App() {
         ease: "expo.in",
         duration: 1.3,
       })
-      .to(
-        pathRef,
-        {
-          attr: {
-            d: "M 99.4 73.5 H 126 c -4.9 30.2 -31 53.2 -62.6 53.2 C 28.4 126.8 0 98.4 0 63.4 S 28.4 0 63.4 0 C 95 0 121.1 23.1 126.8 53.3 H 126.8 v 20.2 z",
-          },
-          duration: 0.3,
-        },
-        "<"
-      )
-      .set(landolt, { rotation: r }, 1.3)
-      .set(pathRef, {
-        attr: {
-          d: "M 99.4 73.5 H 126 c -4.9 30.2 -31 53.2 -62.6 53.2 C 28.4 126.8 0 98.4 0 63.4 S 28.4 0 63.4 0 C 95 0 121.1 23.1 126 53.3 H 99 v 20.2 z",
-        },
-      });
+      // .to(
+      //   pathRef,
+      //   {
+      //     attr: {
+      //       d: "M 99.4 73.5 H 126 c -4.9 30.2 -31 53.2 -62.6 53.2 C 28.4 126.8 0 98.4 0 63.4 S 28.4 0 63.4 0 C 95 0 121.1 23.1 126.8 53.3 H 126.8 v 20.2 z",
+      //     },
+      //     duration: 0.3,
+      //   },
+      //   "<"
+      // )
+      .set(landolt, { rotation: r }, 1.3);
+    // .set(pathRef, {
+    //   attr: {
+    //     d: "M 99.4 73.5 H 126 c -4.9 30.2 -31 53.2 -62.6 53.2 C 28.4 126.8 0 98.4 0 63.4 S 28.4 0 63.4 0 C 95 0 121.1 23.1 126 53.3 H 99 v 20.2 z",
+    //   },
+    // });
   };
   const _throwCake = async (_direction) => {
     if (throwAnim?.isActive()) return;
@@ -326,28 +326,31 @@ export default function App() {
             onClick={_spin}
           >
             <svg
-              //class="h-full w-full"
+              ref={landolt}
               style={{
                 width: sizes[size()].px + "px",
                 height: sizes[size()].px + "px",
+                enableBackground: "new 0 0 124 124",
               }}
-              ref={landolt}
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
               version="1.1"
               id="Layer_1"
-              width="300"
-              height="126.8"
-              viewBox="0 0 126.8 126.8"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              x="0px"
+              y="0px"
+              viewBox="0 0 124 124"
               xml:space="preserve"
             >
-              <g>
-                <path
-                  ref={pathRef}
-                  d="M 99.4 73.5 H 126 c -4.9 30.2 -31 53.2 -62.6 53.2 C 28.4 126.8 0 98.4 0 63.4 S 28.4 0 63.4 0 C 95 0 121.1 23.1 126 53.3 H 99 v 20.2 z"
-                />
-                <circle style="fill:#FFFFFF;" cx="63" cy="63.4" r="37.8" />
-              </g>
+              <path
+                ref={pathRef}
+                class="st0"
+                fillRule="evenodd"
+                clipRule="evenodd"
+                fill="#020203"
+                d="M62.6,0C28,0,0,27.8,0,62c0,34.2,28,62,62.6,62c30.1,0,55.3-21.1,61.3-49.2h-26
+	c-5.3,14.2-19,24.3-35.2,24.3c-20.7,0-37.5-16.6-37.5-37.1c0-20.5,16.8-37.1,37.5-37.1c16.5,0,30.5,10.5,35.5,25.2H124
+	C118.4,21.5,93,0,62.6,0"
+              />
             </svg>
           </div>
           {/* <Landolt> */}
